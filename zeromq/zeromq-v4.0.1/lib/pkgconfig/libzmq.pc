@@ -1,4 +1,4 @@
-prefix=/vagrant/tests/support/zeromq-v4.0.1
+prefix=/tmp/zeromq
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

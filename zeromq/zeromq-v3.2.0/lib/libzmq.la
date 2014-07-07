@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/vagrant/tests/support/zeromq-v3.2.0/lib'
+libdir='/tmp/zeromq/lib'
