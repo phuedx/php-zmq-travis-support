@@ -1,3 +1,37 @@
+# Builds the specified version of libsodium.
+#
+#     1 - The version of libsodium to install, in the form "x.y.z"
+#     2 - The directory to install libsodium to
+#     3 - The directory to move the installed libsodium to
+build_libsodium() {
+    local version=$1
+    local install_dir=$2
+    local dest_dir=$3
+
+    git clone https://github.com/jedisct1/libsodium libsodium-src
+    cd libsodium-src
+    git checkout "tags/${version}"
+
+    if test -d $install_dir
+    then
+        sudo rm -rf $install_dir
+    fi
+
+    ./autogen.sh
+    ./configure --prefix=$install_dir
+    make -j 8
+    sudo make install
+
+    cd .. # cd libsodium
+
+    if test -d $dest_dir
+    then
+        rm -rf $dest_dir
+    fi
+
+    cp -r $install_dir $dest_dir
+}
+
 # Builds the specified version of ØMQ.
 #
 # Parameters:
@@ -48,6 +82,10 @@ build_zeromq() {
     cp -r $install_dir $dest_dir
 }
 
+libsodium_version="0.7.0"
+libsodium_install_dir="/tmp/libsodium"
+libsodium_dest_dir="/vagrant/libsodium/libsodium-${libsodium_version}"
+
 zeromq_versions=(
     "v2.2.0"
     "v3.1.0"
@@ -66,6 +104,11 @@ zeromq_install_dir=/tmp/zeromq
 zeromq_base_dest_dir=/vagrant/zeromq
 
 pushd /tmp
+
+build_libsodium \
+    $libsodium_version \
+    $libsodium_install_dir \
+    $libsodium_dest_dir
 
 for zeromq_version in "${zeromq_versions[@]}"
 do
