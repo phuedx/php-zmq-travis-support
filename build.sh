@@ -43,6 +43,7 @@ build_zeromq() {
     local version=$1
     local install_dir=$2
     local dest_dir=$3
+    local with_libsodium_option=""
 
     case $zeromq_version in
     v2.2.0)
@@ -59,6 +60,8 @@ build_zeromq() {
         git clone https://github.com/zeromq/zeromq4-x
         cd zeromq4-x
         git checkout "tags/${version}"
+
+        with_libsodium_option="--with-libsodium=/tmp/libsodium"
         ;;
     esac
 
@@ -68,7 +71,7 @@ build_zeromq() {
     fi
 
     ./autogen.sh
-    ./configure --prefix=$install_dir
+    ./configure --prefix=$install_dir $with_libsodium_option
     make -j 8
     sudo make install
 
