@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zlist_t zlist_t;
-
 //  @interface
 //  Comparison function for zlist_sort method
 typedef bool (zlist_compare_fn) (void *item1, void *item2);
@@ -40,21 +37,18 @@ CZMQ_EXPORT void
 CZMQ_EXPORT void *
     zlist_first (zlist_t *self);
 
+//  Return next item in the list, or null
+CZMQ_EXPORT void *
+    zlist_next (zlist_t *self);
+
 //  Return last item in the list, or null
 CZMQ_EXPORT void *
     zlist_last (zlist_t *self);
 
-//  Return first item in the list, or null, leaves the cursor
+//  Return current item in the list, or null
 CZMQ_EXPORT void *
-    zlist_head (zlist_t *self);
+    zlist_curr (zlist_t *self);
 
-//  Return last item in the list, or null, leaves the cursor
-CZMQ_EXPORT void *
-    zlist_tail (zlist_t *self);
-
-//  Return next item in the list, or null
-CZMQ_EXPORT void *
-    zlist_next (zlist_t *self);
 
 //  Append an item to the end of the list, return 0 if OK
 //  or -1 if this failed for some reason (out of memory).
@@ -104,6 +98,16 @@ CZMQ_EXPORT void
 //  list is empty.
 CZMQ_EXPORT void
     zlist_autofree (zlist_t *self);
+
+//  DEPRECATED as over-designed and not useful
+//  Return first item in the list, or null, leaves the cursor
+CZMQ_EXPORT void *
+    zlist_head (zlist_t *self);
+
+//  DEPRECATED as over-designed and not useful
+//  Return last item in the list, or null, leaves the cursor
+CZMQ_EXPORT void *
+    zlist_tail (zlist_t *self);
 
 //  Self test of this class
 CZMQ_EXPORT void

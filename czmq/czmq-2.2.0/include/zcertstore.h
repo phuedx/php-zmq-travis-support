@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zcertstore_t zcertstore_t;
-
 //  @interface
 
 //  Create a new certificate store from a disk directory, loading and 
@@ -48,16 +45,17 @@ CZMQ_EXPORT zcert_t *
 CZMQ_EXPORT void
     zcertstore_insert (zcertstore_t *self, zcert_t **cert_p);
 
+//  Print list of certificates in store to logging facility
+CZMQ_EXPORT void
+    zcertstore_print (zcertstore_t *self);
+
+//  DEPRECATED as incompatible with centralized logging
 //  Print list of certificates in store to open stream
 CZMQ_EXPORT void
     zcertstore_fprint (zcertstore_t *self, FILE *file);
 
-//  Print list of certificates in store to stdout
-CZMQ_EXPORT void
-    zcertstore_print (zcertstore_t *self);
-
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zcertstore_test (bool verbose);
 //  @end
 

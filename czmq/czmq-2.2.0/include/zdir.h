@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zdir_t zdir_t;
-
 //  @interface
 //  Create a new directory item that loads in the full tree of the
 //  specified path, optionally located under some parent path.
@@ -93,7 +90,7 @@ CZMQ_EXPORT void
     zdir_print (zdir_t *self, int indent);
 
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zdir_test (bool verbose);
 //  @end
 

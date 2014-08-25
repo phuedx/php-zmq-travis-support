@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zfile_t zfile_t;
-
 //  @interface
 //  If file exists, populates properties. CZMQ supports portable symbolic
 //  links, which are files with the extension ".ln". A symbolic link is a
@@ -85,6 +82,11 @@ CZMQ_EXPORT bool
 CZMQ_EXPORT bool
     zfile_is_stable (zfile_t *self);
 
+//  Return true if the file was changed on disk since the zfile_t object
+//  was created, or the last zfile_restat() call made on it.
+CZMQ_EXPORT bool
+    zfile_has_changed (zfile_t *self);
+
 //  Remove the file from disk
 CZMQ_EXPORT void
     zfile_remove (zfile_t *self);
@@ -124,7 +126,7 @@ CZMQ_EXPORT char *
     zfile_digest (zfile_t *self);
 
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zfile_test (bool verbose);
 //  @end
 

@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zchunk_t zchunk_t;
-
 //  @interface
 //  Create new chunk
 CZMQ_EXPORT zchunk_t *
@@ -79,10 +76,25 @@ CZMQ_EXPORT zchunk_t *
 CZMQ_EXPORT int
     zchunk_write (zchunk_t *self, FILE *handle);
 
+//  Try to slurp an entire file into a chunk. Will read up to maxsize of
+//  the file. If maxsize is 0, will attempt to read the entire file and
+//  fail with an assertion if that cannot fit into memory. Returns a new
+//  chunk containing the file data, or NULL if the file could not be read.
+CZMQ_EXPORT zchunk_t *
+    zchunk_slurp (const char *filename, size_t maxsize);
+
 //  Create copy of chunk, as new chunk object. Returns a fresh zchunk_t
 //  object, or NULL if there was not enough heap memory.
 CZMQ_EXPORT zchunk_t *
     zchunk_dup (zchunk_t *self);
+
+//  Transform zchunk into a zframe that can be sent in a message.
+CZMQ_EXPORT zframe_t *
+    zchunk_pack (zchunk_t *self);
+
+//  Transform a zframe into a zchunk.
+CZMQ_EXPORT zchunk_t *
+    zchunk_unpack (zframe_t *frame);
 
 //  Dump chunk to FILE stream, for debugging and tracing.
 CZMQ_EXPORT void
@@ -93,8 +105,12 @@ CZMQ_EXPORT void
 CZMQ_EXPORT void
     zchunk_print (zchunk_t *self);
 
+//  Probe the supplied object, and report if it looks like a zchunk_t.
+CZMQ_EXPORT bool
+    zchunk_is (void *self);
+
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zchunk_test (bool verbose);
 //  @end
 

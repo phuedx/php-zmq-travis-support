@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zrex_t zrex_t;
-
 //  @interface
 //  Constructor. Optionally, sets an expression against which we can match
 //  text and capture hits. If there is an error in the expression, reports
@@ -67,7 +64,7 @@ CZMQ_EXPORT const char *
     zrex_hit (zrex_t *self, uint index);
 
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zrex_test (bool verbose);
 //  @end
 

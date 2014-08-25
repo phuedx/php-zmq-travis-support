@@ -27,19 +27,24 @@ CZMQ_EXPORT void
 CZMQ_EXPORT int64_t
     zclock_time (void);
 
-//  Print formatted string to stdout, prefixed by date/time and
-//  terminated with a newline.
-CZMQ_EXPORT void
-    zclock_log (const char *format, ...);
+//  Return current monotonic clock in milliseconds
+CZMQ_EXPORT int64_t
+    zclock_mono (void);
 
 //  Return formatted date/time as fresh string. Free using zstr_free().
 CZMQ_EXPORT char *
     zclock_timestr (void);
 
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zclock_test (bool verbose);
 //  @end
+
+//  DEPRECATED in favor of zsys logging, see issue #519
+//  Print formatted string to stdout, prefixed by date/time and
+//  terminated with a newline.
+CZMQ_EXPORT void
+    zclock_log (const char *format, ...);
 
 //  Compiler hints
 CZMQ_EXPORT void zclock_log (const char *format, ...) CHECK_PRINTF (1);

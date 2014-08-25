@@ -18,9 +18,6 @@
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zframe_t zframe_t;
-
 //  @interface
 #define ZFRAME_MORE     1
 #define ZFRAME_REUSE    2
@@ -42,17 +39,12 @@ CZMQ_EXPORT void
 //  was interrupted. Does a blocking recv, if you want to not block then use
 //  zframe_recv_nowait().
 CZMQ_EXPORT zframe_t *
-    zframe_recv (void *socket);
-
-//  Receive a new frame off the socket. Returns newly allocated frame, or
-//  NULL if there was no input waiting, or if the read was interrupted.
-CZMQ_EXPORT zframe_t *
-    zframe_recv_nowait (void *socket);
+    zframe_recv (void *source);
 
 // Send a frame to a socket, destroy frame after sending.
 // Return -1 on error, 0 on success.
 CZMQ_EXPORT int
-    zframe_send (zframe_t **self_p, void *socket, int flags);
+    zframe_send (zframe_t **self_p, void *dest, int flags);
 
 //  Return number of bytes in frame data
 CZMQ_EXPORT size_t
@@ -93,26 +85,35 @@ CZMQ_EXPORT void
 CZMQ_EXPORT bool
     zframe_eq (zframe_t *self, zframe_t *other);
 
-//   Print contents of the frame to FILE stream.
-CZMQ_EXPORT void
-    zframe_fprint (zframe_t *self, const char *prefix, FILE *file);
-
-//  Print contents of frame to stderr
-CZMQ_EXPORT void
-    zframe_print (zframe_t *self, const char *prefix);
-
 //  Set new contents for frame
 CZMQ_EXPORT void
     zframe_reset (zframe_t *self, const void *data, size_t size);
 
-//  Put a block of data to the frame payload.
-CZMQ_EXPORT int
-    zframe_put_block (zframe_t *self, byte *data, size_t size);
+//  Send message to zsys log sink (may be stdout, or system facility as
+//  configured by zsys_set_logstream). Prefix shows before frame, if not null.
+CZMQ_EXPORT void
+    zframe_print (zframe_t *self, const char *prefix);
+
+//  Probe the supplied object, and report if it looks like a zframe_t.
+CZMQ_EXPORT bool
+    zframe_is (void *self);
 
 //  Self test of this class
-CZMQ_EXPORT int
+CZMQ_EXPORT void
     zframe_test (bool verbose);
 //  @end
+
+//  DEPRECATED as poor style -- callers should use zloop or zpoller
+//  Receive a new frame off the socket. Returns newly allocated frame, or
+//  NULL if there was no input waiting, or if the read was interrupted.
+CZMQ_EXPORT zframe_t *
+    zframe_recv_nowait (void *source);
+
+//  DEPRECATED as inconsistent; breaks principle that logging should all go
+//  to a single destination.
+//  Print contents of the frame to FILE stream.
+CZMQ_EXPORT void
+    zframe_fprint (zframe_t *self, const char *prefix, FILE *file);
 
 //  Deprecated method aliases
 #define zframe_print_to_stream(s,p,F) zframe_fprint(s,p,F)

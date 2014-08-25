@@ -146,7 +146,7 @@
 #elif (defined (__ANDROID__))
 #   define __UTYPE_ANDROID
 #   define __UNIX__
-#elif (defined (LINUX) || defined (linux))
+#elif (defined (LINUX) || defined (linux) || defined (__linux__))
 #   define __UTYPE_LINUX
 #   define __UNIX__
 #   ifndef __NO_CTYPE
@@ -290,6 +290,8 @@
 #   endif
 #   if (defined (__UTYPE_OSX))
 #       include <crt_externs.h>         //  For _NSGetEnviron()
+#       include <mach/clock.h>
+#       include <mach/mach.h>           //  For monotonic clocks
 #   endif
 #endif
 
@@ -341,14 +343,18 @@
 #   endif
 #endif
 
-//  Add missing defines for Android
-#ifdef __UTYPE_ANDROID
-#   ifndef S_IREAD
-#       define S_IREAD S_IRUSR
-#   endif
-#   ifndef S_IWRITE
-#       define S_IWRITE S_IWUSR
-#   endif
+//  Add missing defines for non-POSIX systems
+#ifndef S_IRUSR
+#   define S_IRUSR S_IREAD
+#endif
+#ifndef S_IWUSR
+#   define S_IWUSR S_IWRITE 
+#endif
+#ifndef S_ISDIR
+#   define S_ISDIR(m) (((m) & S_IFDIR) != 0)
+#endif
+#ifndef S_ISREG
+#   define S_ISREG(m) (((m) & S_IFREG) != 0)
 #endif
 
 
@@ -415,7 +421,11 @@ typedef struct sockaddr_in inaddr_t;    //  Internet socket address structure
     typedef unsigned int  uint;
 #   if (!defined (__MINGW32__))
     typedef int mode_t;
+#if defined (__IS_64BIT__)
+    typedef long long ssize_t;
+#else
     typedef long ssize_t;
+#endif
     typedef __int32 int32_t;
     typedef __int64 int64_t;
     typedef unsigned __int32 uint32_t;
@@ -428,6 +438,11 @@ typedef struct sockaddr_in inaddr_t;    //  Internet socket address structure
 #elif (defined (__UTYPE_OSX))
     typedef unsigned long ulong;
     typedef unsigned int uint;
+    //  This fixes header-order dependence problem with some Linux versions
+#elif (defined (__UTYPE_LINUX)) 
+#   if (__STDC_VERSION__ >= 199901L)
+    typedef unsigned int uint;
+#   endif
 #endif
 
 //- Error reporting ---------------------------------------------------------
@@ -471,7 +486,16 @@ static inline void *
 #   define CHECK_PRINTF(a)
 #endif
 
-//- Socket header files -----------------------------------------------------
+//  Lets us write code that compiles both on Windows and normal platforms
+#if !defined (__WINDOWS__)
+typedef int SOCKET;
+#   define closesocket      close
+#   define INVALID_SOCKET   -1
+#   define SOCKET_ERROR     -1
+#   define O_BINARY         0
+#endif
+
+//- Include non-portable header files based on platform.h -------------------
 
 #if defined (HAVE_LINUX_WIRELESS_H)
 #   include <linux/wireless.h>
@@ -483,15 +507,24 @@ static inline void *
 #       include <net/if_media.h>
 #   endif
 #endif
-//  Lets us write code that compiles both on Windows and normal platforms
-#if !defined (__WINDOWS__)
-typedef int SOCKET;
-#   define closesocket close
-#   define INVALID_SOCKET -1
-#   define SOCKET_ERROR -1
+
+#if defined (__WINDOWS__) && !defined (HAVE_LIBUUID)
+#   define HAVE_LIBUUID 1
+#endif
+#if defined (__UTYPE_OSX) && !defined (HAVE_LIBUUID)
+#   define HAVE_LIBUUID 1
+#endif
+#if defined (HAVE_LIBUUID)
+#   if defined (__UTYPE_FREEBSD) || defined (__UTYPE_NETBSD)
+#       include <uuid.h>
+#   elif defined __UTYPE_HPUX
+#       include <dce/uuid.h>
+#   elif defined (__UNIX__)
+#       include <uuid/uuid.h>
+#   endif
 #endif
 
-//- DLL exports -------------------------------------------------------------
+//- Non-portable declaration specifiers -------------------------------------
 
 #if defined (__WINDOWS__)
 #   if defined LIBCZMQ_STATIC
@@ -505,6 +538,13 @@ typedef int SOCKET;
 #   define CZMQ_EXPORT
 #endif
 
+//  For thread-local storage
+#if defined (__WINDOWS__)
+#   define CZMQ_THREADLS __declspec(thread)
+#else
+#   define CZMQ_THREADLS __thread
+#endif
+
 //- Always include ZeroMQ header file ---------------------------------------
 
 #include "zmq.h"
@@ -515,11 +555,17 @@ typedef int SOCKET;
 
 #elif ZMQ_VERSION_MAJOR == 3
 #   define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
+#   if  ZMQ_VERSION_MINOR < 2
+#       define zmq_ctx_new  zmq_init
+#   endif
+#   define zmq_ctx_term     zmq_term
 
 #elif ZMQ_VERSION_MAJOR == 2
 #   define ZMQ_POLL_MSEC    1000        //  zmq_poll is usec
 #   define zmq_sendmsg      zmq_send    //  Smooth out 2.x changes
 #   define zmq_recvmsg      zmq_recv
+#   define zmq_ctx_new      zmq_init
+#   define zmq_ctx_term     zmq_term
     //  Older libzmq APIs may be missing some aspects of libzmq v3.0
 #   ifndef ZMQ_ROUTER
 #       define ZMQ_ROUTER       ZMQ_XREP
