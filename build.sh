@@ -138,6 +138,7 @@ zeromq_versions=(
     "v4.0.2"
     "v4.0.3"
     "v4.0.4"
+    "v4.0.5"
 )
 zeromq_install_dir=/tmp/zeromq
 zeromq_base_dest_dir=/vagrant/zeromq
