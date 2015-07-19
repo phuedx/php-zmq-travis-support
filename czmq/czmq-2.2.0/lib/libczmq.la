@@ -5,10 +5,10 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libczmq.so.1'
+dlname='libczmq.so.3'
 
 # Names of this library.
-library_names='libczmq.so.1.1.0 libczmq.so.1 libczmq.so'
+library_names='libczmq.so.3.0.0 libczmq.so.3 libczmq.so'
 
 # The name of the static archive.
 old_library='libczmq.a'
@@ -17,14 +17,14 @@ old_library='libczmq.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/tmp/zeromq/lib /tmp/zeromq/lib/libzmq.la -L/tmp/libsodium/lib /tmp/libsodium/lib/libsodium.la -lrt -luuid -lpthread'
+dependency_libs=' -L/tmp/zeromq/lib /tmp/zeromq/lib/libzmq.la -L/tmp/libsodium/lib /tmp/libsodium/lib/libsodium.la -lrt -lpthread'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
 
 # Version information for libczmq.
-current=2
-age=1
+current=3
+age=0
 revision=0
 
 # Is this an already installed library?

@@ -7,10 +7,9 @@
     statements. DO NOT MAKE ANY CHANGES YOU WISH TO KEEP. The correct places
     for commits are:
 
-    * The XML model used for this code generation: zgossip.xml
-    * The code generation script that built this file: zproto_server_c
+     * The XML model used for this code generation: zgossip.xml, or
+     * The code generation script that built this file: zproto_server_c
     ************************************************************************
-
     Copyright (c) the Contributors as noted in the AUTHORS file.       
     This file is part of CZMQ, the high-level C binding for 0MQ:       
     http://czmq.zeromq.org.                                            
@@ -21,8 +20,10 @@
     =========================================================================
 */
 
-#ifndef __ZGOSSIP_H_INCLUDED__
-#define __ZGOSSIP_H_INCLUDED__
+#ifndef ZGOSSIP_H_INCLUDED
+#define ZGOSSIP_H_INCLUDED
+
+#include "czmq.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,43 +32,51 @@ extern "C" {
 //  @interface
 //  To work with zgossip, use the CZMQ zactor API:
 //
-//  Create new zgossip server instance, passing logging prefix:
+//  Create new zgossip instance, passing logging prefix:
 //
-//      zactor_t *zgossip_server = zactor_new (zgossip, "myname");
-//  
-//  Destroy zgossip server instance
+//      zactor_t *zgossip = zactor_new (zgossip, "myname");
 //
-//      zactor_destroy (&zgossip_server);
-//  
-//  Bind zgossip server to specified endpoint. TCP endpoints may specify
+//  Destroy zgossip instance
+//
+//      zactor_destroy (&zgossip);
+//
+//  Enable verbose logging of commands and activity:
+//
+//      zstr_send (zgossip, "VERBOSE");
+//
+//  Bind zgossip to specified endpoint. TCP endpoints may specify
 //  the port number as "*" to aquire an ephemeral port:
 //
-//      zstr_sendx (zgossip_server, "BIND", endpoint, NULL);
+//      zstr_sendx (zgossip, "BIND", endpoint, NULL);
 //
 //  Return assigned port number, specifically when BIND was done using an
 //  an ephemeral port:
 //
-//      zstr_sendx (zgossip_server, "PORT", NULL);
+//      zstr_sendx (zgossip, "PORT", NULL);
 //      char *command, *port_str;
-//      zstr_recvx (zgossip_server, &command, &port_str, NULL);
+//      zstr_recvx (zgossip, &command, &port_str, NULL);
 //      assert (streq (command, "PORT"));
 //
 //  Specify configuration file to load, overwriting any previous loaded
 //  configuration file or options:
 //
-//      zstr_sendx (zgossip_server, "CONFIGURE", filename, NULL);
+//      zstr_sendx (zgossip, "LOAD", filename, NULL);
 //
 //  Set configuration path value:
 //
-//      zstr_sendx (zgossip_server, "SET", path, value, NULL);
-//    
-//  Send zmsg_t instance to zgossip server:
+//      zstr_sendx (zgossip, "SET", path, value, NULL);
 //
-//      zactor_send (zgossip_server, &msg);
+//  Save configuration data to config file on disk:
 //
-//  Receive zmsg_t instance from zgossip server:
+//      zstr_sendx (zgossip, "SAVE", filename, NULL);
 //
-//      zmsg_t *msg = zactor_recv (zgossip_server);
+//  Send zmsg_t instance to zgossip:
+//
+//      zactor_send (zgossip, &msg);
+//
+//  Receive zmsg_t instance from zgossip:
+//
+//      zmsg_t *msg = zactor_recv (zgossip);
 //
 //  This is the zgossip constructor as a zactor_fn:
 //

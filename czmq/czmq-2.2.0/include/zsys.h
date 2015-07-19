@@ -31,7 +31,14 @@ typedef void (zsys_handler_fn) (int signal_value);
 //  times. Returns global CZMQ context.
 CZMQ_EXPORT void *
     zsys_init (void);
-    
+
+//  Optionally shut down the CZMQ zsys layer; this normally happens automatically
+//  when the process exits; however this call lets you force a shutdown
+//  earlier, avoiding any potential problems with atexit() ordering, especially
+//  with Windows dlls.
+CZMQ_EXPORT void
+    zsys_shutdown (void);
+
 //  Get a new ZMQ socket, automagically creating a ZMQ context if this is
 //  the first time. Caller is responsible for destroying the ZMQ socket
 //  before process exits, to avoid a ZMQ deadlock. Note: you should not use
@@ -45,6 +52,17 @@ CZMQ_EXPORT void *
 //  *** This is for CZMQ internal use only and may change arbitrarily ***
 CZMQ_EXPORT int
     zsys_close (void *handle, const char *filename, size_t line_nbr);
+
+//  Return ZMQ socket name for socket type
+//  *** This is for CZMQ internal use only and may change arbitrarily ***
+CZMQ_EXPORT char *
+    zsys_sockname (int socktype);
+    
+//  Create a pipe, which consists of two PAIR sockets connected over inproc.
+//  The pipe is configured to use the zsys_pipehwm setting. Returns the
+//  frontend socket successful, NULL if failed.
+CZMQ_EXPORT zsock_t *
+    zsys_create_pipe (zsock_t **backend_p);
     
 //  Set interrupt handler; this saves the default handlers so that a
 //  zsys_handler_reset () can restore them. If you call this multiple times
@@ -77,7 +95,8 @@ CZMQ_EXPORT time_t
 
 //  Return file mode; provides at least support for the POSIX S_ISREG(m)
 //  and S_ISDIR(m) macros and the S_IRUSR and S_IWUSR bits, on all boxes.
-CZMQ_EXPORT mode_t
+//  Returns a mode_t cast to int, or -1 in case of error.
+CZMQ_EXPORT int
     zsys_file_mode (const char *filename);
 
 //  Delete file. Does not complain if the file is absent
@@ -96,6 +115,10 @@ CZMQ_EXPORT int
 //  Remove a file path if empty; the pathname is treated as printf format.
 CZMQ_EXPORT int
     zsys_dir_delete (const char *pathname, ...);
+
+//  Move to a specified working directory. Returns 0 if OK, -1 if this failed.
+CZMQ_EXPORT int
+    zsys_dir_change (const char *pathname);
 
 //  Set private file creation mode; all files created from here will be
 //  readable/writable by the owner only.
@@ -136,9 +159,10 @@ CZMQ_EXPORT SOCKET
 CZMQ_EXPORT int
     zsys_udp_close (SOCKET handle);
 
-//  Send zframe to UDP socket
+//  Send zframe to UDP socket, return -1 if sending failed due to
+//  interface having disappeared (happens easily with WiFi)
 //  *** This is for CZMQ internal use only and may change arbitrarily ***
-CZMQ_EXPORT void
+CZMQ_EXPORT int
     zsys_udp_send (SOCKET udpsock, zframe_t *frame, inaddr_t *address);
 
 //  Receive zframe from UDP socket, and set address of peer that sent it
@@ -154,7 +178,8 @@ CZMQ_EXPORT void
     zsys_socket_error (const char *reason);
 
 //  Return current host name, for use in public tcp:// endpoints. Caller gets
-//  a freshly allocated string, should free it using zstr_free().
+//  a freshly allocated string, should free it using zstr_free(). If the host
+//  name is not resolvable, returns NULL.
 CZMQ_EXPORT char *
     zsys_hostname (void);
 
@@ -248,6 +273,7 @@ CZMQ_EXPORT void
 //  For example, on Mac OS X, zbeacon cannot bind to 255.255.255.255 which is
 //  the default when there is no specified interface. If the environment
 //  variable ZSYS_INTERFACE is set, use that as the default interface name.
+//  Setting the interface to "*" means "use all available interfaces".
 CZMQ_EXPORT void
     zsys_set_interface (const char *value);
 

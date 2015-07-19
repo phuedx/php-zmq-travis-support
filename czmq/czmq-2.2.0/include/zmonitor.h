@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zsock_monitor - socket event monitor
+    zmonitor - socket event monitor
 
     Copyright (c) the Contributors as noted in the AUTHORS file.
     This file is part of CZMQ, the high-level C binding for 0MQ:
@@ -11,8 +11,8 @@
     =========================================================================
 */
 
-#ifndef __ZSOCK_MONITOR_H_INCLUDED__
-#define __ZSOCK_MONITOR_H_INCLUDED__
+#ifndef __ZMONITOR_H_INCLUDED__
+#define __ZMONITOR_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,10 +29,10 @@ extern "C" {
 //
 //  Enable verbose logging of commands and activity.
 //
-//      zstr_sendx (monitor, "VERBOSE", NULL);
+//      zstr_send (monitor, "VERBOSE");
 //
-//  Listen to monitor event type:
-//      zstr_sendx (monitor, "LISTEN", type, type, type, NULL);
+//  Listen to monitor event type (zero or types, ending in NULL):
+//      zstr_sendx (monitor, "LISTEN", type, ..., NULL);
 //  
 //      Events:
 //      CONNECTED
@@ -50,7 +50,7 @@ extern "C" {
 //
 //  Start monitor; after this, any further LISTEN commands are ignored.
 //
-//      zstr_sendx (monitor, "START", NULL);
+//      zstr_send (monitor, "START");
 //      zsock_wait (monitor);
 //
 //  Receive next monitor event:

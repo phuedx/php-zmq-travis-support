@@ -41,12 +41,12 @@ CZMQ_EXPORT int
 
 //  Poll the registered readers for I/O, return first reader that has input.
 //  The reader will be a libzmq void * socket, or a zsock_t or zactor_t
-//  instance as specified in zpoller_new/zpoller_add. The order that
-//  sockets are defined in the poll list affects their priority. If you
-//  need a balanced poll, use the low level zmq_poll method directly. If
-//  the poll call was interrupted (SIGINT), or the ZMQ context was
-//  destroyed, or the timeout expired, returns NULL. You can test the
-//  actual exit condition by calling zpoller_expired () and
+//  instance as specified in zpoller_new/zpoller_add. The timeout should be
+//  zero or greater, or -1 to wait indefinitely. Socket priority is defined
+//  by their order in the poll list. If you need a balanced poll, use the low
+//  level zmq_poll method directly. If the poll call was interrupted (SIGINT),
+//  or the ZMQ context was destroyed, or the timeout expired, returns NULL.
+//  You can test the actual exit condition by calling zpoller_expired () and
 //  zpoller_terminated (). The timeout is in msec.
 CZMQ_EXPORT void *
     zpoller_wait (zpoller_t *self, int timeout);
@@ -60,6 +60,13 @@ CZMQ_EXPORT bool
 //  was interrupted, or the parent context was destroyed.
 CZMQ_EXPORT bool
     zpoller_terminated (zpoller_t *self);
+
+//  Ignore zsys_interrupted flag in this poller. By default, a zpoller_wait will
+//  return immediately if detects zsys_interrupted is set to something other than
+//  zero. Calling zpoller_ignore_interrupts will supress this behavior.
+
+CZMQ_EXPORT void
+    zpoller_ignore_interrupts(zpoller_t *self);
 
 //  Self test of this class
 CZMQ_EXPORT void

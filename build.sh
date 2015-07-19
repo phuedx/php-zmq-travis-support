@@ -121,7 +121,7 @@ build_czmq() {
     cp -r $install_dir $dest_dir
 }
 
-libsodium_version="0.7.0"
+libsodium_version="1.0.3"
 libsodium_install_dir="/tmp/libsodium"
 libsodium_dest_dir="/vagrant/libsodium/libsodium-${libsodium_version}"
 
